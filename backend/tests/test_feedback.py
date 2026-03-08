@@ -1,5 +1,5 @@
 """
-testing suite for the get_feedback function from app.utils.feedback
+testing suite for app.utils.feedback
 """
 
 from app.utils.feedback import get_feedback
