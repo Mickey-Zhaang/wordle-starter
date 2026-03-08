@@ -1,42 +1,227 @@
 #root {
-  max-width: 1280px;
+  max-width: 600px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.app {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Start screen */
+.start-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem 0;
+}
+
+.wordle-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.wordle-title.small {
+  font-size: 1.75rem;
+}
+
+.start-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.start-form label {
+  font-size: 0.95rem;
+}
+
+.word-length-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.word-length-btn {
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.word-length-btn.selected {
+  background-color: #538d4e;
+  border-color: #538d4e;
+  color: white;
+}
+
+.btn-primary {
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background-color: #538d4e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: #4a7c44;
+}
+
+/* Game board */
+.game-board {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.game-row {
+  display: flex;
+  gap: 0.35rem;
+  justify-content: center;
+}
+
+.game-cell {
+  width: 2.75rem;
+  height: 2.75rem;
+  max-width: 62px;
+  max-height: 62px;
+  aspect-ratio: 1;
+  border: 2px solid #3a3a3c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.game-cell.cell-correct {
+  background-color: #538d4e;
+  border-color: #538d4e;
+  color: white;
+}
+
+.game-cell.cell-present {
+  background-color: #b59f3b;
+  border-color: #b59f3b;
+  color: white;
+}
+
+.game-cell.cell-absent {
+  background-color: #3a3a3c;
+  border-color: #3a3a3c;
+  color: white;
+}
+
+@media (prefers-color-scheme: light) {
+  .game-cell {
+    border-color: #d3d6da;
+  }
+
+  .game-cell.cell-absent {
+    background-color: #787c7e;
+    border-color: #787c7e;
+  }
+}
+
+/* Keyboard */
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 500px;
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 0.35rem;
+  justify-content: center;
+}
+
+.key-btn {
+  min-width: 2rem;
+  height: 3rem;
+  padding: 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #818384;
+  color: white;
+}
+
+.key-btn:hover {
+  background-color: #6b6d6e;
+}
+
+.key-btn.key-special {
+  font-size: 0.7rem;
+  min-width: 3rem;
+}
+
+.key-btn.key-correct {
+  background-color: #538d4e;
+}
+
+.key-btn.key-present {
+  background-color: #b59f3b;
+}
+
+.key-btn.key-absent {
+  background-color: #3a3a3c;
+}
+
+@media (prefers-color-scheme: light) {
+  .key-btn {
+    background-color: #d3d6da;
+    color: #1a1a1a;
+  }
+
+  .key-btn:hover {
+    background-color: #c5c8cb;
+  }
+
+  .key-btn.key-absent {
+    background-color: #787c7e;
+    color: white;
+  }
+}
+
+/* Game over */
+.game-over {
   text-align: center;
+  padding: 1rem;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.game-over.won p {
+  color: #538d4e;
+  font-weight: 600;
+  margin: 0 0 1rem;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.game-over.lost p {
+  margin: 0 0 1rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+.game-over strong {
+  font-weight: 700;
 }
