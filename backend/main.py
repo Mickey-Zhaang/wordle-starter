@@ -1,3 +1,7 @@
+"""
+main.py
+"""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -15,9 +19,15 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
+    """
+    Reads the root
+    """
     return {"message": "Hello World"}
 
 
 @app.get("/health")
 def health_check():
+    """
+    health checks
+    """
     return {"status": "healthy"}
