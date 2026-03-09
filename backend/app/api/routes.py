@@ -46,7 +46,7 @@ def get_games_game_id(game_id: str):
     response = {
         "game_id": game.game_id,
         "word_length": game.word_length,
-        "max_guesses": game.max_guesses,
+        "max_guesses": game.max_guesses if game.max_guesses is not None else game.word_length + 1,
         "guess_history": game.guess_history,
         "feedback": game.feedback_per_row(),
         "status": game.status,

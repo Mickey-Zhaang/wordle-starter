@@ -54,8 +54,7 @@ function StartScreen({
             <ul className="unfinished-games-list" aria-label="Unfinished games">
               {unfinishedGames.map((game) => {
                 const guessCount = game.guess_history?.length ?? 0;
-                const maxGuesses = game.max_guesses ?? game.word_length + 1;
-                const meta = `${game.word_length} letters · ${guessCount}/${maxGuesses} guesses`;
+                const meta = `${game.word_length} letters · ${guessCount}/${game.max_guesses} guesses`;
                 return (
                   <li key={game.game_id} className="unfinished-game-slot">
                     <button
