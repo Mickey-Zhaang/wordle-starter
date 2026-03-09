@@ -54,7 +54,7 @@ export const App = () => {
       guessHistory: data.guess_history || [],
       feedbackPerRow: data.feedback || [],
       currentRow: "",
-      status: data.status,
+      status: data.status ?? "playing",
       target: data.target ?? null,
     });
   }, []);
