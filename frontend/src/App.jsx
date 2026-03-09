@@ -38,7 +38,6 @@ export const App = () => {
     loadUnfinishedGames();
   }, [loadUnfinishedGames]);
 
-
   const onResumeGame = useCallback(async (gameId) => {
     setStartError(null);
     try {

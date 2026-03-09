@@ -1,4 +1,9 @@
-export const UnfinishedGamesList = ({ games, onResumeGame, onRemoveGame, loading }) => {
+export const UnfinishedGamesList = ({
+  games,
+  onResumeGame,
+  onRemoveGame,
+  loading,
+}) => {
   if (games.length === 0) return null;
 
   return (
@@ -22,8 +27,7 @@ export const UnfinishedGamesList = ({ games, onResumeGame, onRemoveGame, loading
               <button
                 type="button"
                 className="unfinished-game-slot__remove"
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={() => {
                   onRemoveGame?.(game.game_id);
                 }}
                 disabled={loading}
