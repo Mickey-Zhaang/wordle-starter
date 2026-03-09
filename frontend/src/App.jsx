@@ -7,6 +7,27 @@ import { getLetterFeedback } from "./utils/feedback";
 import { createGame, submitGuess, getGame } from "./api/client";
 
 const SESSION_GAME_ID = "wordle-game-id";
+const WORDLE_GAME_IDS = "wordle-game-ids";
+
+function getStoredGameIds() {
+  try {
+    const raw = sessionStorage.getItem(WORDLE_GAME_IDS);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function appendStoredGameId(gameId) {
+  const ids = getStoredGameIds();
+  if (!ids.includes(gameId)) ids.push(gameId);
+  sessionStorage.setItem(WORDLE_GAME_IDS, JSON.stringify(ids));
+}
+
+function removeStoredGameId(gameId) {
+  const ids = getStoredGameIds().filter((id) => id !== gameId);
+  sessionStorage.setItem(WORDLE_GAME_IDS, JSON.stringify(ids));
+}
 
 function App() {
   const [gameState, setGameState] = useState(null);
@@ -15,35 +36,61 @@ function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [guessError, setGuessError] = useState(null);
   const [resumeChecked, setResumeChecked] = useState(false);
+  const [unfinishedGames, setUnfinishedGames] = useState([]);
 
   const stateRef = useRef(gameState);
   const submittingRef = useRef(isSubmitting);
   stateRef.current = gameState;
   submittingRef.current = isSubmitting;
 
-  // Optional: resume game from sessionStorage on mount
   useEffect(() => {
     if (resumeChecked) return;
     setResumeChecked(true);
     const savedId = sessionStorage.getItem(SESSION_GAME_ID);
-    if (!savedId) return;
-    getGame(savedId)
-      .then((data) => {
-        setGameState({
-          gameId: data.game_id,
-          wordLength: data.word_length,
-          maxGuesses: data.max_guesses,
-          guessHistory: data.guess_history || [],
-          feedbackPerRow: data.feedback || [],
-          currentRow: "",
-          status: data.status,
-          target: data.target ?? null,
-        });
-      })
-      .catch(() => {
-        sessionStorage.removeItem(SESSION_GAME_ID);
-      });
+    const ids = getStoredGameIds();
+    if (savedId && ids.length === 0) {
+      sessionStorage.setItem(WORDLE_GAME_IDS, JSON.stringify([savedId]));
+    }
   }, [resumeChecked]);
+
+  // When on start screen, fetch stored game ids and filter to playing
+  useEffect(() => {
+    if (gameState !== null) return;
+    const ids = getStoredGameIds();
+    if (ids.length === 0) {
+      setUnfinishedGames([]);
+      return;
+    }
+    Promise.all(ids.map((id) => getGame(id).catch(() => null)))
+      .then((results) =>
+        results.filter((data) => data && data.status === "playing"),
+      )
+      .then(setUnfinishedGames);
+  }, [gameState]);
+
+  const onResumeGame = useCallback(async (gameId) => {
+    setStartError(null);
+    try {
+      const data = await getGame(gameId);
+      sessionStorage.setItem(SESSION_GAME_ID, gameId);
+      setGameState({
+        gameId: data.game_id,
+        wordLength: data.word_length,
+        maxGuesses: data.max_guesses,
+        guessHistory: data.guess_history || [],
+        feedbackPerRow: data.feedback || [],
+        currentRow: "",
+        status: data.status,
+        target: data.target ?? null,
+      });
+    } catch (e) {
+      setStartError(e.detail || e.message || "Failed to load game");
+    }
+  }, []);
+
+  const goToStartScreen = useCallback(() => {
+    setGameState(null);
+  }, []);
 
   const startGame = useCallback(async (wordLength) => {
     setStartError(null);
@@ -51,6 +98,7 @@ function App() {
     try {
       const data = await createGame(wordLength);
       sessionStorage.setItem(SESSION_GAME_ID, data.game_id);
+      appendStoredGameId(data.game_id);
       setGameState({
         gameId: data.game_id,
         wordLength: data.word_length,
@@ -78,6 +126,9 @@ function App() {
     setIsSubmitting(true);
     try {
       const data = await submitGuess(gameId, guess);
+      if (data.status === "won" || data.status === "lost") {
+        removeStoredGameId(gameId);
+      }
       setGameState((prev) => ({
         ...prev,
         guessHistory: data.guess_history,
@@ -88,6 +139,7 @@ function App() {
       }));
     } catch (e) {
       if (e.status === 404) {
+        removeStoredGameId(gameId);
         sessionStorage.removeItem(SESSION_GAME_ID);
         setGameState(null);
         setStartError(e.detail || "Game not found");
@@ -155,6 +207,8 @@ function App() {
     return (
       <StartScreen
         onStart={startGame}
+        onResumeGame={onResumeGame}
+        unfinishedGames={unfinishedGames}
         error={startError}
         loading={isStarting}
       />
@@ -168,7 +222,14 @@ function App() {
 
   return (
     <div className="app game-screen">
-      <h1 className="wordle-title small">Wordle</h1>
+      <button
+        type="button"
+        className="wordle-title wordle-title-link small"
+        onClick={goToStartScreen}
+        aria-label="Back to start"
+      >
+        Wordle
+      </button>
       <GameBoard
         rows={rows}
         feedbackPerRow={feedbackPerRow}
@@ -195,6 +256,7 @@ function App() {
             type="button"
             className="btn-primary"
             onClick={() => {
+              removeStoredGameId(gameState.gameId);
               sessionStorage.removeItem(SESSION_GAME_ID);
               setGameState(null);
             }}

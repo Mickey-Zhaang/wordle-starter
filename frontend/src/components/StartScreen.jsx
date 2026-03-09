@@ -1,6 +1,12 @@
 import { useState } from "react";
 
-function StartScreen({ onStart, error, loading }) {
+function StartScreen({
+  onStart,
+  onResumeGame,
+  unfinishedGames = [],
+  error,
+  loading,
+}) {
   const [wordLength, setWordLength] = useState(5);
 
   function handleSubmit(e) {
@@ -11,7 +17,12 @@ function StartScreen({ onStart, error, loading }) {
   return (
     <div className="start-screen">
       <h1 className="wordle-title">Wordle</h1>
-      {error && <p className="start-error" role="alert">{error}</p>}
+      {error && (
+        <p className="start-error" role="alert">
+          {error}
+        </p>
+      )}
+
       <form onSubmit={handleSubmit} className="start-form">
         <label htmlFor="word-length">Word length</label>
         <div
@@ -34,6 +45,28 @@ function StartScreen({ onStart, error, loading }) {
         <button type="submit" className="btn-primary" disabled={loading}>
           {loading ? "Starting…" : "Start game"}
         </button>
+        {unfinishedGames.length > 0 && (
+          <div className="start-form">
+            <label>Unfinished games</label>
+            <div
+              className="word-length-buttons"
+              role="group"
+              aria-label="Unfinished games"
+            >
+              {unfinishedGames.map((game, index) => (
+                <button
+                  key={game.game_id}
+                  type="button"
+                  className="word-length-btn"
+                  onClick={() => onResumeGame(game.game_id)}
+                  disabled={loading}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </form>
     </div>
   );

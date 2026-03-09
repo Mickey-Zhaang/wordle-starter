@@ -37,6 +37,22 @@
   font-size: 1.75rem;
 }
 
+.wordle-title-link {
+  background: none;
+  border: none;
+  padding: 0.25em 0.5em;
+  margin: -0.25em -0.5em;
+  border-radius: 0.5em;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+  transition: background-color 0.15s ease;
+}
+
+.wordle-title-link:hover {
+  background-color: rgba(125, 125, 125, 0.08);
+}
+
 .start-form {
   display: flex;
   flex-direction: column;
