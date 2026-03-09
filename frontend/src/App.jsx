@@ -1,15 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import "./App.css";
+
+// Components
 import { StartScreen } from "./components/StartScreen";
 import { GameScreenContainer } from "./components/GameScreenContainer";
-import {
-  SESSION_GAME_ID,
-  WORDLE_GAME_IDS,
-  getStoredGameIds,
-  appendStoredGameId,
-  removeStoredGameId,
-  clearSessionIfGame,
-} from "./storage";
+
+// Infrastructure
+import * as Storage from "./storage";
 import { fetchUnfinishedGames } from "./api/games";
 import { createGame, getGame } from "./api/client";
 
@@ -19,123 +16,125 @@ export const App = () => {
   const [startError, setStartError] = useState(null);
   const [unfinishedGames, setUnfinishedGames] = useState([]);
 
-  const loadUnfinishedGames = useCallback(() => {
-    fetchUnfinishedGames().then(({ games, notFoundIds }) => {
+  // --- 1. DATA SYNCING ---
+
+  const refreshLobby = useCallback(async () => {
+    try {
+      const { games, notFoundIds } = await fetchUnfinishedGames();
+
+      // Cleanup any dead references found by the API
       notFoundIds.forEach((id) => {
-        removeStoredGameId(id);
-        clearSessionIfGame(id);
+        Storage.removeStoredGameId(id);
+        Storage.clearSessionIfGame(id);
       });
+
       setUnfinishedGames(games);
-    });
+    } catch (e) {
+      console.error("Failed to sync unfinished games", e);
+    }
   }, []);
 
   useEffect(() => {
-    const savedId = sessionStorage.getItem(SESSION_GAME_ID);
-    const ids = getStoredGameIds();
-    if (savedId && ids.length === 0) {
-      sessionStorage.setItem(WORDLE_GAME_IDS, JSON.stringify([savedId]));
+    // Initial sync: Ensure session and storage are aligned
+    const savedId = sessionStorage.getItem(Storage.SESSION_GAME_ID);
+    if (savedId && Storage.getStoredGameIds().length === 0) {
+      Storage.appendStoredGameId(savedId);
     }
-    loadUnfinishedGames();
-  }, [loadUnfinishedGames]);
+    refreshLobby();
+  }, [refreshLobby]);
 
-  const onResumeGame = useCallback(async (gameId) => {
-    setStartError(null);
-    try {
-      const data = await getGame(gameId);
-      sessionStorage.setItem(SESSION_GAME_ID, gameId);
-      setGameState({
-        gameId: data.game_id,
-        wordLength: data.word_length,
-        maxGuesses: data.max_guesses,
-        guessHistory: data.guess_history || [],
-        feedbackPerRow: data.feedback || [],
-        currentRow: "",
-        status: data.status,
-        target: data.target ?? null,
-      });
-    } catch (e) {
-      setStartError(e.detail || e.message || "Failed to load game");
-    }
+  // --- 2. GAME ACTIONS ---
+
+  const handleGameResolution = useCallback((data) => {
+    Storage.setSessionGame(data.game_id);
+    setGameState({
+      gameId: data.game_id,
+      wordLength: data.word_length,
+      maxGuesses: data.max_guesses,
+      guessHistory: data.guess_history || [],
+      feedbackPerRow: data.feedback || [],
+      currentRow: "",
+      status: data.status,
+      target: data.target ?? null,
+    });
   }, []);
 
+  const onResumeGame = useCallback(
+    async (gameId) => {
+      setStartError(null);
+      try {
+        const data = await getGame(gameId);
+        handleGameResolution(data);
+      } catch (e) {
+        setStartError(e.detail || e.message || "Failed to load game");
+      }
+    },
+    [handleGameResolution],
+  );
+
+  const onStartNewGame = useCallback(
+    async (wordLength) => {
+      setStartError(null);
+      setIsStarting(true);
+      try {
+        const data = await createGame(wordLength);
+        Storage.appendStoredGameId(data.game_id);
+        handleGameResolution(data);
+      } catch (e) {
+        setStartError(e.detail || e.message || "Failed to start game");
+      } finally {
+        setIsStarting(false);
+      }
+    },
+    [handleGameResolution],
+  );
+
   const onRemoveGame = useCallback((gameId) => {
-    removeStoredGameId(gameId);
-    clearSessionIfGame(gameId);
+    Storage.removeStoredGameId(gameId);
+    Storage.clearSessionIfGame(gameId);
     setUnfinishedGames((prev) => prev.filter((g) => g.game_id !== gameId));
   }, []);
 
-  const goToStartScreen = useCallback(() => {
-    setGameState(null);
-    loadUnfinishedGames();
-  }, [loadUnfinishedGames]);
+  // --- 3. NAVIGATION ---
 
-  const startGame = useCallback(async (wordLength) => {
-    setStartError(null);
-    setIsStarting(true);
-    try {
-      const data = await createGame(wordLength);
-      sessionStorage.setItem(SESSION_GAME_ID, data.game_id);
-      appendStoredGameId(data.game_id);
-      setGameState({
-        gameId: data.game_id,
-        wordLength: data.word_length,
-        maxGuesses: data.max_guesses,
-        guessHistory: [],
-        feedbackPerRow: [],
-        currentRow: "",
-        status: "playing",
-        target: null,
-      });
-    } catch (e) {
-      setStartError(e.detail || e.message || "Failed to start game");
-    } finally {
-      setIsStarting(false);
-    }
-  }, []);
-
-  const handleExitToStart = useCallback(
-    (gameId, detail) => {
-      if (gameId) {
-        removeStoredGameId(gameId);
-        clearSessionIfGame(gameId);
-      }
+  const exitToMenu = useCallback(
+    (errorDetail = null) => {
       setGameState(null);
-      setStartError(detail || "Game not found");
-      loadUnfinishedGames();
+      setStartError(errorDetail ?? null);
+      refreshLobby();
     },
-    [loadUnfinishedGames],
+    [refreshLobby],
   );
 
-  if (gameState == null) {
-    return (
-      <main className="wordle-container">
+  // --- 4. RENDER ---
+
+  return (
+    <main className="wordle-container">
+      {!gameState ? (
         <StartScreen
-          onStart={startGame}
+          onStart={onStartNewGame}
           onResumeGame={onResumeGame}
           onRemoveGame={onRemoveGame}
           unfinishedGames={unfinishedGames}
           error={startError}
           loading={isStarting}
         />
-      </main>
-    );
-  }
-
-  return (
-    <main className="wordle-container">
-      <GameScreenContainer
-        key={gameState.gameId}
-        initialGameState={gameState}
-        onGameNotFound={handleExitToStart}
-        onGameWonOrLost={() => removeStoredGameId(gameState.gameId)}
-        onBackToStart={goToStartScreen}
-        onNewGame={() => {
-          removeStoredGameId(gameState.gameId);
-          clearSessionIfGame(gameState.gameId);
-          setGameState(null);
-          loadUnfinishedGames();
-        }}
-      />
+      ) : (
+        <GameScreenContainer
+          key={gameState.gameId}
+          initialGameState={gameState}
+          onGameNotFound={(id, detail) => {
+            if (id) onRemoveGame(id);
+            exitToMenu(detail || "Game not found");
+          }}
+          onGameWonOrLost={() => Storage.removeStoredGameId(gameState.gameId)}
+          onBackToStart={() => exitToMenu()}
+          onNewGame={() => {
+            onRemoveGame(gameState.gameId);
+            exitToMenu();
+          }}
+        />
+      )}
     </main>
   );
 };

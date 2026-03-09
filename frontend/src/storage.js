@@ -47,6 +47,10 @@ export function removeStoredGameId(gameId) {
   setStorage(WORDLE_GAME_IDS, JSON.stringify(ids));
 }
 
+export function setSessionGame(gameId) {
+  setStorage(SESSION_GAME_ID, gameId);
+}
+
 export function clearSessionIfGame(gameId) {
   if (sessionStorage.getItem(SESSION_GAME_ID) === gameId) {
     removeStorage(SESSION_GAME_ID);
