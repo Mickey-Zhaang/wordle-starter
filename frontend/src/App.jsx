@@ -88,6 +88,11 @@ function App() {
     }
   }, []);
 
+  const onRemoveGame = useCallback((gameId) => {
+    removeStoredGameId(gameId);
+    setUnfinishedGames((prev) => prev.filter((g) => g.game_id !== gameId));
+  }, []);
+
   const goToStartScreen = useCallback(() => {
     setGameState(null);
   }, []);
@@ -208,6 +213,7 @@ function App() {
       <StartScreen
         onStart={startGame}
         onResumeGame={onResumeGame}
+        onRemoveGame={onRemoveGame}
         unfinishedGames={unfinishedGames}
         error={startError}
         loading={isStarting}

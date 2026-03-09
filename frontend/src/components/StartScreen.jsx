@@ -3,6 +3,7 @@ import { useState } from "react";
 function StartScreen({
   onStart,
   onResumeGame,
+  onRemoveGame,
   unfinishedGames = [],
   error,
   loading,
@@ -24,7 +25,7 @@ function StartScreen({
       )}
 
       <form onSubmit={handleSubmit} className="start-form">
-        <label htmlFor="word-length">Word length</label>
+        <label htmlFor="word-length">Choose Word Length</label>
         <div
           className="word-length-buttons"
           role="group"
@@ -36,6 +37,7 @@ function StartScreen({
               type="button"
               className={`word-length-btn ${wordLength === n ? "selected" : ""}`}
               onClick={() => setWordLength(n)}
+              onDoubleClick={() => !loading && onStart(n)}
               disabled={loading}
             >
               {n}
@@ -54,15 +56,28 @@ function StartScreen({
               aria-label="Unfinished games"
             >
               {unfinishedGames.map((game, index) => (
-                <button
-                  key={game.game_id}
-                  type="button"
-                  className="word-length-btn"
-                  onClick={() => onResumeGame(game.game_id)}
-                  disabled={loading}
-                >
-                  {index + 1}
-                </button>
+                <div key={game.game_id} className="unfinished-game-slot">
+                  <button
+                    type="button"
+                    className="word-length-btn"
+                    onClick={() => onResumeGame(game.game_id)}
+                    disabled={loading}
+                  >
+                    {index + 1}
+                  </button>
+                  <button
+                    type="button"
+                    className="unfinished-game-slot__remove"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveGame?.(game.game_id);
+                    }}
+                    disabled={loading}
+                    aria-label={`Remove game ${index + 1} from list`}
+                  >
+                    ×
+                  </button>
+                </div>
               ))}
             </div>
           </div>
