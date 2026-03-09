@@ -64,6 +64,29 @@
   font-size: 0.95rem;
 }
 
+.start-form__fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.start-form__legend {
+  padding-bottom: 1rem;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.start-form__heading {
+  font-size: 0.95rem;
+  font-weight: normal;
+  margin: 0 0 0.25rem 0;
+}
+
 .word-length-buttons {
   display: flex;
   gap: 0.5rem;
@@ -84,43 +107,67 @@
 }
 
 /* Unfinished game slot: number button + remove x */
-.unfinished-game-slot {
-  position: relative;
-  width: 3rem;
-  height: 3rem;
+.unfinished-games-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 20rem;
 }
 
+.unfinished-game-slot {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+/* Main resume target: same look as word-length buttons */
+.unfinished-game-slot__resume {
+  flex: 1;
+  min-height: 44px;
+  padding: 0.5rem 12px;
+  font-size: 0.95rem;
+  text-align: left;
+  /* Inherit button background/border from index.css so it matches word-length choices */
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.unfinished-game-slot__resume:hover {
+  border-color: #646cff;
+}
+
+.unfinished-game-slot__resume:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Remove: separate target, 44×44px minimum, visual distance from resume */
 .unfinished-game-slot__remove {
-  position: absolute;
-  top: 1px;
-  right: 1px;
-  width: 0.8rem;
-  height: 0.8rem;
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0;
-  font-size: 0.85rem;
+  font-size: 1.25rem;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #939393;
-  background: rgba(0, 0, 0, 0.08);
-  border: none;
-  border-radius: 4px;
+  color: #666;
+  background: #1A1A1A;
+  border-radius: 8px;
   cursor: pointer;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-}
-
-.unfinished-game-slot:hover .unfinished-game-slot__remove {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .unfinished-game-slot__remove:hover {
-  color: #939393;
-  background: rgba(198, 2, 2, 0.5);
+  color: #999;
+  background: rgba(180, 0, 0, 0.25);
+  border-color: rgba(180, 0, 0, 0.25);
 }
+
 .unfinished-game-slot__remove:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -146,8 +193,7 @@
   cursor: not-allowed;
 }
 
-.start-error,
-.guess-error {
+.start-error {
   color: #c0392b;
   font-size: 0.95rem;
   margin: 0;
@@ -159,6 +205,18 @@
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+}
+
+@keyframes cell-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+.game-row--shake .game-cell {
+  animation: cell-shake 0.5s ease-in-out;
 }
 
 .game-row {

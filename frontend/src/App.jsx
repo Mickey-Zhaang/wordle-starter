@@ -34,7 +34,7 @@ function App() {
   const [isStarting, setIsStarting] = useState(false);
   const [startError, setStartError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [guessError, setGuessError] = useState(null);
+  const [shakeRowIndex, setShakeRowIndex] = useState(null);
   const [resumeChecked, setResumeChecked] = useState(false);
   const [unfinishedGames, setUnfinishedGames] = useState([]);
 
@@ -127,7 +127,7 @@ function App() {
     : {};
 
   const handleSubmitGuess = useCallback(async (gameId, guess) => {
-    setGuessError(null);
+    setShakeRowIndex(null);
     setIsSubmitting(true);
     try {
       const data = await submitGuess(gameId, guess);
@@ -149,7 +149,9 @@ function App() {
         setGameState(null);
         setStartError(e.detail || "Game not found");
       } else {
-        setGuessError(e.detail || e.message || "Invalid guess");
+        const rowIndex = stateRef.current?.guessHistory?.length ?? 0;
+        setShakeRowIndex(rowIndex);
+        setTimeout(() => setShakeRowIndex(null), 600);
       }
     } finally {
       setIsSubmitting(false);
@@ -241,12 +243,8 @@ function App() {
         feedbackPerRow={feedbackPerRow}
         wordLength={gameState.wordLength}
         maxRows={gameState.maxGuesses}
+        shakeRowIndex={shakeRowIndex}
       />
-      {guessError && (
-        <p className="guess-error" role="alert">
-          {guessError}
-        </p>
-      )}
       {(gameState.status === "won" || gameState.status === "lost") && (
         <div className={`game-over ${gameState.status}`}>
           <p>
