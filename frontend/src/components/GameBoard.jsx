@@ -1,4 +1,4 @@
-function GameBoard({ rows, feedbackPerRow, wordLength, maxRows, shakeRowIndex }) {
+export const GameBoard = ({ rows, feedbackPerRow, wordLength, maxRows, shakeRowIndex }) => {
   const paddedRows = Array.from({ length: maxRows }, (_, r) => {
     const rowLetters = rows[r] != null ? rows[r].toUpperCase().split("") : [];
     const feedback = feedbackPerRow[r] || [];
@@ -22,6 +22,4 @@ function GameBoard({ rows, feedbackPerRow, wordLength, maxRows, shakeRowIndex })
   });
 
   return <div className="game-board">{paddedRows}</div>;
-}
-
-export default GameBoard;
+};

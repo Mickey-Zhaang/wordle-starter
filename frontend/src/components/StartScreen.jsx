@@ -1,14 +1,15 @@
 import { useState } from "react";
-import UnfinishedGamesList from "./UnfinishedGamesList";
+import { UnfinishedGamesList } from "./UnfinishedGamesList";
+import { WordLengthChoice } from "./WordLengthChoice";
 
-function StartScreen({
+export const StartScreen = ({
   onStart,
   onResumeGame,
   onRemoveGame,
   unfinishedGames = [],
   error,
   loading,
-}) {
+}) => {
   const [wordLength, setWordLength] = useState(5);
 
   function handleSubmit(e) {
@@ -34,15 +35,13 @@ function StartScreen({
             aria-label="Word length"
           >
             {[5, 6, 7, 8].map((n) => (
-              <button
+              <WordLengthChoice
                 key={n}
-                type="button"
-                className={`word-length-btn ${wordLength === n ? "selected" : ""}`}
-                onClick={() => setWordLength(n)}
+                value={n}
+                selected={wordLength === n}
+                onClick={setWordLength}
                 disabled={loading}
-              >
-                {n}
-              </button>
+              />
             ))}
           </div>
         </fieldset>
@@ -58,6 +57,4 @@ function StartScreen({
       />
     </div>
   );
-}
-
-export default StartScreen;
+};

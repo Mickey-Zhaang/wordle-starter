@@ -1,4 +1,4 @@
-function UnfinishedGamesList({ games, onResumeGame, onRemoveGame, loading }) {
+export const UnfinishedGamesList = ({ games, onResumeGame, onRemoveGame, loading }) => {
   if (games.length === 0) return null;
 
   return (
@@ -37,6 +37,4 @@ function UnfinishedGamesList({ games, onResumeGame, onRemoveGame, loading }) {
       </ul>
     </div>
   );
-}
-
-export default UnfinishedGamesList;
+};

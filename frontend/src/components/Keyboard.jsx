@@ -8,7 +8,7 @@ const KEYBOARD_ROWS = [
   },
 ];
 
-function Keyboard({ letterFeedback, onKey }) {
+export const Keyboard = ({ letterFeedback, onKey }) => {
   function keyClass(letter) {
     const status = letterFeedback[letter];
     if (status) return `key-${status}`;
@@ -51,6 +51,4 @@ function Keyboard({ letterFeedback, onKey }) {
       ))}
     </div>
   );
-}
-
-export default Keyboard;
+};
