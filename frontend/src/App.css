@@ -82,6 +82,19 @@
   background-color: #4a7c44;
 }
 
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.start-error,
+.guess-error {
+  color: #c0392b;
+  font-size: 0.95rem;
+  margin: 0;
+  text-align: center;
+}
+
 /* Game board */
 .game-board {
   display: flex;
