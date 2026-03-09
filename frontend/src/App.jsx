@@ -126,7 +126,7 @@ export const App = () => {
       <GameScreenContainer
         key={gameState.gameId}
         initialGameState={gameState}
-        onExitToStart={handleExitToStart}
+        onGameNotFound={handleExitToStart}
         onGameWonOrLost={() => removeStoredGameId(gameState.gameId)}
         onBackToStart={goToStartScreen}
         onNewGame={() => {

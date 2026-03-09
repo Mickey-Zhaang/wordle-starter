@@ -3,7 +3,7 @@ import { GameScreen } from "./GameScreen";
 
 export const GameScreenContainer = ({
   initialGameState,
-  onExitToStart,
+  onGameNotFound,
   onGameWonOrLost,
   onBackToStart,
   onNewGame,
@@ -11,10 +11,14 @@ export const GameScreenContainer = ({
   const { gameState, handleKey, shakeRowIndex, letterFeedback } = useWordle(
     initialGameState,
     {
-      onGameNotFound: onExitToStart,
+      onGameNotFound,
       onGameWonOrLost,
     },
   );
+
+  if (!gameState) {
+    return <div className="app loading-screen">Loading game...</div>;
+  }
 
   return (
     <GameScreen
